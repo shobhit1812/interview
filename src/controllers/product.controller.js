@@ -13,15 +13,19 @@ const createProduct = async (req, res) => {
       return res.status(409).send("Product already exists.");
     }
 
-    if (!req.files || !req.files.productImage || !req.files.productImage[0]) {
-      return res.status(400).send("Product image are required.");
+    if (
+      !req.files ||
+      !req.files.productImage ||
+      req.files.productImage.length === 0
+    ) {
+      return res.status(400).send("Product image(s) are required.");
     }
 
-    const imageUrls = req.files?.productImage[0]?.path;
+    const imageUrls = req.files.productImage.map((file) => file.path);
 
     const product = await Product.create({
       name,
-      productImage: imageUrls,
+      productImage: imageUrls.join(", "),
     });
 
     return res.status(201).json({
@@ -42,7 +46,7 @@ const getProducts = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Product fetched successfully.",
+      message: "Products fetched successfully.",
       products,
     });
   } catch (error) {
@@ -50,4 +54,23 @@ const getProducts = async (req, res) => {
   }
 };
 
-export { createProduct, getProducts };
+const getProductById = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).send("No product found.");
+    }
+
+    return res.status(200).json({
+      message: "Product fetched successfully.",
+      product,
+    });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
+
+export { createProduct, getProducts, getProductById };
