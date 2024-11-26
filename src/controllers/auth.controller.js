@@ -78,7 +78,7 @@ const loginUser = async (req, res) => {
       return res.status(500).send("Error while generating token.");
     }
 
-    user.token = token;
+    user.token = token; 
     await user.save({ validateBeforeSave: false });
 
     const loggedInUser = await User.findById(user._id).select(
